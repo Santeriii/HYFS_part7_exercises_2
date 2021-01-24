@@ -7,14 +7,17 @@ import Togglable from './components/Togglable'
 import Footer from './components/Footer'
 import noteService from './services/notes'
 import loginService from './services/login'
+import { notificationChange } from './reducers/notificationReducer'
+import { useDispatch, useSelector } from 'react-redux'
 
 const App = () => {
   const [notes, setNotes] = useState([])
   const [showAll, setShowAll] = useState(true)
-  const [errorMessage, setErrorMessage] = useState(null)
+  const errorMessage = useSelector(state => state)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
+  const dispatch = useDispatch()
 
   const noteFormRef = React.createRef()
 
@@ -54,11 +57,11 @@ const App = () => {
         setNotes(notes.map(note => note.id !== id ? note : returnedNote))
       })
       .catch(() => {
-        setErrorMessage(
+        dispatch(notificationChange(
           `Note '${note.content}' was already removed from server`
-        )
+        ))
         setTimeout(() => {
-          setErrorMessage(null)
+          dispatch(notificationChange(null))
         }, 5000)
       })
   }
@@ -79,9 +82,10 @@ const App = () => {
       setUsername('')
       setPassword('')
     } catch (exception) {
-      setErrorMessage('wrong credentials')
+      dispatch(notificationChange('wrong credentials'))
+      console.log(errorMessage)
       setTimeout(() => {
-        setErrorMessage(null)
+        dispatch(notificationChange(''))
       }, 5000)
     }
   }
