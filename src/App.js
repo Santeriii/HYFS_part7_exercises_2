@@ -8,12 +8,13 @@ import Footer from './components/Footer'
 import noteService from './services/notes'
 import loginService from './services/login'
 import { notificationChange } from './reducers/notificationReducer'
+import { createNote, initializeNotes } from './reducers/noteReducer'
 import { useDispatch, useSelector } from 'react-redux'
 
 const App = () => {
-  const [notes, setNotes] = useState([])
+  const notes = useSelector(state => state.notes)
   const [showAll, setShowAll] = useState(true)
-  const errorMessage = useSelector(state => state)
+  const errorMessage = useSelector(state => state.notification)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
@@ -25,9 +26,9 @@ const App = () => {
     noteService
       .getAll()
       .then(initialNotes => {
-        setNotes(initialNotes)
+        dispatch(initializeNotes(initialNotes))
       })
-  }, [])
+  }, [dispatch])
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedNoteappUser')
@@ -43,7 +44,7 @@ const App = () => {
     noteService
       .create(noteObject)
       .then(returnedNote => {
-        setNotes(notes.concat(returnedNote))
+        dispatch(createNote(returnedNote))
       })
   }
 
@@ -54,7 +55,7 @@ const App = () => {
     noteService
       .update(id, changedNote)
       .then(returnedNote => {
-        setNotes(notes.map(note => note.id !== id ? note : returnedNote))
+        dispatch(createNote(returnedNote))
       })
       .catch(() => {
         dispatch(notificationChange(
